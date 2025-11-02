@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key}); // simplified constructor
+  const MyHomePage({super.key});
 
   final String nama = "Lessyarta Kamali Sopamena Pirade"; // nama
   final String npm = "2406356643"; // npm
   final String kelas = "C"; // kelas
 
   final List<ItemHomepage> items = const [
+    // tiap item punya nama, icon, dan warna
     ItemHomepage("All Products", Icons.shopping_basket, Colors.blue),
     ItemHomepage("My Products", Icons.shopping_bag, Colors.green),
     ItemHomepage("Create Product", Icons.add, Colors.red),
@@ -124,9 +125,13 @@ class InfoCard extends StatelessWidget {
 class ItemHomepage {
   final String name;
   final IconData icon;
-  final Color color;
+  final Color color; // warna
 
-  const ItemHomepage(this.name, this.icon, this.color);
+  const ItemHomepage(
+    this.name,
+    this.icon,
+    this.color,
+  ); // argumen: nama, icon, warna
 }
 
 class ItemCard extends StatelessWidget {
@@ -139,7 +144,7 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      // Menggunakan warna yang telah ditentukan untuk setiap tombol
+      // ambil warna dari item.color
       color: item.color,
       // Membuat sudut kartu melengkung.
       borderRadius: BorderRadius.circular(12),
