@@ -15,6 +15,8 @@ samples, guidance on mobile development, and a full API reference.
 
 # Garuda Gear Mobile
 
+## Tugas 7
+
 1. Jelaskan apa itu widget tree pada Flutter dan bagaimana hubungan parent-child (induk-anak) bekerja antar widget.
 
 = Widget Tree adalah representasi logis dari seluruh UI aplikasi Flutter. Setiap elemen visual di Flutter (seperti teks, tombol, ikon, layout) adalah sebuah widget, dan semua widget tersusun secara hierarkis seperti pohon (tree).
@@ -41,11 +43,11 @@ Setiap perubahan state akan menyebabkan widget terhubung dibangun ulang bersama 
 - MaterialApp: Sebagai root widget aplikasi yang menyediakan kerangka Material Design dan tema warna untuk seluruh app.
 - Scaffold: Menyediakan struktur utama halaman seperti AppBar, body, dan elemen lainnya (misalnya SnackBar).
 - AppBar: Menampilkan judul “Garuda Gear” di bagian atas halaman dengan warna latar dari tema utama aplikasi.
-- Text: Menampilkan teks, seperti judul di AppBar, nama pengguna, NPM, kelas, serta pesan “Selamat datang di Garuda Gear!”.
+- Text: Menampilkan teks, seperti judul di AppBar, nama user, NPM, kelas, serta pesan “Selamat datang di Garuda Gear!”.
 - Padding: Memberi jarak di sekitar konten agar tampilan lebih rapi, misalnya EdgeInsets.all(16.0) pada body.
 - Column: Menyusun widget secara vertikal, seperti menempatkan Row, SizedBox, dan Center secara berurutan di body.
 - Row: Menyusun tiga InfoCard secara horizontal di bagian atas halaman (NPM, Name, Class).
-- InfoCard (custom widget): Widget kustom berbentuk Card untuk menampilkan informasi pengguna (title dan content) secara rapi dengan bayangan lembut.
+- InfoCard (custom widget): Widget kustom berbentuk Card untuk menampilkan informasi user (title dan content) secara rapi dengan bayangan lembut.
 - Card: Memberikan efek kartu dengan bayangan dan batas melengkung untuk tiap InfoCard.
 - Container: Digunakan untuk mengatur ukuran, padding, dan warna latar di berbagai bagian seperti di dalam Card dan ItemCard.
 - SizedBox: Menambahkan jarak vertikal antar elemen (contohnya SizedBox(height: 16.0)).
@@ -107,3 +109,33 @@ Contoh penggunaan:
 
 - Jika teks atau warna diubah, gunakan Hot Reload.
 - Jika variabel global ditambah atau struktur kode besar diubah, gunakan Hot Restart.
+
+## Tugas 8
+
+1. Jelaskan perbedaan antara Navigator.push() dan Navigator.pushReplacement() pada Flutter. Dalam kasus apa sebaiknya masing-masing digunakan pada aplikasi Football Shop kamu?
+
+= Navigator.push() menambahkan halaman (rute) baru di atas stack navigasi. Halaman sebelumnya tetap ada di stack, sehingga user dapat menekan tombol "kembali" untuk kembali ke halaman tersebut. Sebaliknya, Navigator.pushReplacement() mengganti halaman saat ini dengan halaman baru. Halaman yang lama akan dihapus dari stack, sehingga user tidak bisa kembali ke halaman yang diganti tersebut.
+
+Dalam aplikasi Garuda Gear, push() (seperti di left_drawer.dart atau menu.dart saat menekan "Add Product") digunakan saat membuka halaman formulir ProductFormPage. Setelah selesai, user dapat kembali ke halaman utama. pushReplacement() (seperti di left_drawer.dart saat menekan "Home") digunakan saat kembali ke MyHomePage dari drawer. Ini mencegah penumpukan halaman utama di stack jika user berpindah-pindah antar halaman dari menu drawer.
+
+2. Bagaimana kamu memanfaatkan hierarchy widget seperti Scaffold, AppBar, dan Drawer untuk membangun struktur halaman yang konsisten di seluruh aplikasi?
+
+= Scaffold berfungsi sebagai kerangka dasar tata letak Material Design untuk setiap halaman, seperti pada menu.dart (MyHomePage) dan productlist_form.dart (ProductFormPage). Scaffold menyediakan slot standar untuk elemen umum seperti appBar, body, dan drawer. Dengan menggunakan Scaffold sebagai fondasi di setiap halaman, struktur visual akan konsisten.
+
+AppBar ditempatkan di slot appBar untuk menyediakan header aplikasi yang seragam ("Garuda Gear" di menu.dart atau "Form Add Product" di productlist_form.dart). 
+
+Drawer (didefinisikan di left_drawer.dart) menyediakan menu navigasi geser. Dengan memanggil drawer: const LeftDrawer() di Scaffold, user diberikan akses yang sama ke navigasi utama dari mana saja di dalam aplikasi.
+
+3. Dalam konteks desain antarmuka, apa kelebihan menggunakan layout widget seperti Padding, SingleChildScrollView, dan ListView saat menampilkan elemen-elemen form? Berikan contoh penggunaannya dari aplikasi kamu.
+
+= Padding: digunakan untuk memberi jarak satu elemen dengan yang lainnya. Dalam productlist_form.dart, setiap TextFormField dibungkus oleh Padding(padding: const EdgeInsets.all(8.0), ...). Ini memberi jarak antar input field dan antara field dengan tepi layar, membuat formulir lebih mudah dibaca dan disentuh.
+
+SingleChildScrollView: digunakan di productlist_form.dart, di mana Form dibungkus dengan SingleChildScrollView agar saat keyboard virtual muncul atau jika jumlah field melebihi tinggi layar agar user tetap dapat scroll ke bawah untuk mengakses semua field dan tombol "Save". Ini mencegah terjadinya pixel overflow error.
+
+ListView: digunakan di left_drawer.dart untuk menu untuk menampilkan daftar item yang panjang atau dinamis
+
+4. Bagaimana kamu menyesuaikan warna tema agar aplikasi Football Shop memiliki identitas visual yang konsisten dengan brand toko?
+
+= Penyesuaian warna tema secara terpusat dilakukan di file main.dart di dalam widget MaterialApp. Saya menggunakan properti theme: ThemeData(...) untuk mendefinisikan palet warna global. Dalam kode Garuda Gear, colorScheme diatur menggunakan ColorScheme.fromSwatch(primarySwatch: Colors.blue) untuk warna utama dan .copyWith(secondary: Colors.blueAccent[400]) untuk warna sekunder.
+
+Theme adalah InheritedWidget yang menyebarkan informasi (seperti warna) ke semua widget di bawahnya. Ini memungkinkan widget lain, seperti AppBar di menu.dart, untuk menggunakan warna utama tersebut dengan memanggil Theme.of(context).colorScheme.primary. Dengan cara ini, jika saya ingin mengubah main color theme, saya hanya perlu mengubahnya di main.dart dan seluruh aplikasi akan otomatis diperbarui secara konsisten.

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:garuda_gear/widgets/left_drawer.dart';
+import 'package:garuda_gear/widgets/product_card.dart';
+import 'package:garuda_gear/screens/productlist_form.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
@@ -9,9 +12,9 @@ class MyHomePage extends StatelessWidget {
 
   final List<ItemHomepage> items = const [
     // tiap item punya nama, icon, dan warna
-    ItemHomepage("All Products", Icons.shopping_basket, Colors.blue),
-    ItemHomepage("My Products", Icons.shopping_bag, Colors.green),
-    ItemHomepage("Create Product", Icons.add, Colors.red),
+    ItemHomepage("All Products", Icons.sports_soccer, Colors.blue),
+    ItemHomepage("My Products", Icons.shopping_basket, Colors.green),
+    ItemHomepage("Add Product", Icons.add, Colors.red),
   ];
 
   @override
@@ -28,6 +31,7 @@ class MyHomePage extends StatelessWidget {
         // Warna latar belakang AppBar diambil dari skema warna tema aplikasi.
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
+      drawer: LeftDrawer(),
       // Body halaman dengan padding di sekelilingnya.
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -57,7 +61,7 @@ class MyHomePage extends StatelessWidget {
                   const Padding(
                     padding: EdgeInsets.only(top: 16.0),
                     child: Text(
-                      'Selamat datang di Garuda Gear!',
+                      'Welcome to Garuda Gear!',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18.0,
@@ -152,14 +156,21 @@ class ItemCard extends StatelessWidget {
       child: InkWell(
         // Aksi ketika kartu ditekan.
         onTap: () {
-          // Menampilkan pesan SnackBar saat kartu ditekan.
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text("Kamu telah menekan tombol ${item.name}!"),
-              ),
+          // Handle navigation based on which card was tapped
+          if (item.name == "Add Product") {
+            // Navigate to ProductFormPage when Create Product is tapped
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProductFormPage()),
             );
+          } else {
+            // Show SnackBar for other buttons
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(content: Text("You've pressed ${item.name}!")),
+              );
+          }
         },
         // Container untuk menyimpan Icon dan Text
         child: Container(
