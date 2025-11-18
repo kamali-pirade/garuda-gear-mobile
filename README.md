@@ -139,3 +139,63 @@ ListView: digunakan di left_drawer.dart untuk menu untuk menampilkan daftar item
 = Penyesuaian warna tema secara terpusat dilakukan di file main.dart di dalam widget MaterialApp. Saya menggunakan properti theme: ThemeData(...) untuk mendefinisikan palet warna global. Dalam kode Garuda Gear, colorScheme diatur menggunakan ColorScheme.fromSwatch(primarySwatch: Colors.blue) untuk warna utama dan .copyWith(secondary: Colors.blueAccent[400]) untuk warna sekunder.
 
 Theme adalah InheritedWidget yang menyebarkan informasi (seperti warna) ke semua widget di bawahnya. Ini memungkinkan widget lain, seperti AppBar di menu.dart, untuk menggunakan warna utama tersebut dengan memanggil Theme.of(context).colorScheme.primary. Dengan cara ini, jika saya ingin mengubah main color theme, saya hanya perlu mengubahnya di main.dart dan seluruh aplikasi akan otomatis diperbarui secara konsisten.
+
+## Tugas 9
+
+1. Jelaskan mengapa kita perlu membuat model Dart saat mengambil/mengirim data JSON? Apa konsekuensinya jika langsung memetakan Map<String, dynamic> tanpa model (terkait validasi tipe, null-safety, maintainability)?
+
+= Model (product_entry.dart) memberikan tipe yang jelas, validasi mudah, dan code lebih maintainable dibanding langsung memakai Map<String, dynamic>. Pada aplikasi Garuda Gear saya, ProductEntry.fromJson/toJson memastikan struktur yang dikembalikan endpoint /json/ cocok dengan UI. Ini mencegah error runtime saat FutureBuilder di product_list.dart mencoba membaca properti yang tidak ada.
+
+Jika memakai Map langsung, konsekuensinya adalah hilangnya null-safety dan tipe sehingga mudah terjadi cast error, sulit menelusuri bug, dan perubahan backend memerlukan banyak pengecekan tersebar di UI. Dengan model, perubahan lapisan data cukup disesuaikan di satu tempat.
+
+2. Apa fungsi package http dan CookieRequest dalam tugas ini? Jelaskan perbedaan peran http vs CookieRequest.
+
+= Fungsi package http dan CookieRequest:
+- http (low-level): mengirim GET/POST biasa, cocok untuk API tanpa autentikasi berbasis cookie. Tidak otomatis mengelola cookie/CSRF.
+- CookieRequest (di main.dart): membungkus request + otomatis menyimpan cookie, mengurus CSRF header, dan menyediakan helper login, postJson, get yang memudahkan workflow Django berbasis sesi.
+
+Di Garuda Gear, semua operasi login/register/postJson/get menggunakan CookieRequest sehingga autentikasi stateful (session cookie) bekerja dengan benar antara Flutter dan Django.
+
+3. Jelaskan mengapa instance CookieRequest perlu untuk dibagikan ke semua komponen di aplikasi Flutter.
+
+= Alasan: session/cookie adalah global state: setelah login server mengeluarkan cookie sesi, widget manapun yang akan melakukan request butuh akses ke cookie itu. Di main.dart, saya memakai Provider untuk menyuntikkan satu instance CookieRequest ke seluruh subtree sehingga context.watch<CookieRequest>() di login.dart, productlist_form.dart, product_list.dart dll. selalu memakai session yang sama.
+
+Keuntungan: konsistensi autentikasi (request.logout() benar-benar menghapus cookie untuk seluruh app), lebih mudah testing dan mock.
+
+4. Jelaskan konfigurasi konektivitas yang diperlukan agar Flutter dapat berkomunikasi dengan Django. Mengapa kita perlu menambahkan 10.0.2.2 pada ALLOWED_HOSTS, mengaktifkan CORS dan pengaturan SameSite/cookie, dan menambahkan izin akses internet di Android? Apa yang akan terjadi jika konfigurasi tersebut tidak dilakukan dengan benar?
+
+= Agar Flutter dapat berkomunikasi dengan Django, diperlukan beberapa konfigurasi: 
+
+(1) menambahkan 10.0.2.2 ke ALLOWED_HOSTS karena Android emulator menggunakan alamat tersebut untuk mengakses localhost host machine, sehingga tanpa ini Django akan menolak request dengan error "DisallowedHost"
+
+(2) mengaktifkan CORS (django-cors-headers) dengan CORS_ALLOW_CREDENTIALS = True dan menambahkan origin Flutter ke CORS_ALLOWED_ORIGINS agar browser/app mengizinkan request lintas domain beserta cookie-nya
+
+(3) mengatur SESSION_COOKIE_SAMESITE = None dan CSRF_COOKIE_SAMESITE = None (dengan SECURE di production) supaya cookie sesi dapat dikirim saat request cross-origin, karena jika tidak diatur cookie tidak akan disertakan dan autentikasi berbasis sesi akan gagal meskipun login berhasil
+
+(4) menambahkan <uses-permission android:name="android.permission.INTERNET" /> di android/app/src/main/AndroidManifest.xml agar aplikasi Android mendapat izin akses internet, tanpa ini semua request jaringan akan terblokir.
+
+Jika konfigurasi ini tidak dilakukan dengan benar, aplikasi Garuda Gear akan mengalami berbagai error seperti koneksi gagal, login tidak persisten (cookie tidak tersimpan), atau CSRF verification failed.
+
+5. Jelaskan mekanisme pengiriman data mulai dari input hingga dapat ditampilkan pada Flutter.
+
+= Pada aplikasi Garuda Gear, mekanisme pengiriman data dimulai ketika user mengisi form lalu menekan tombol Save yang memicu request.postJson untuk mengirim data JSON ke endpoint Django. Django menerima data tersebut, memvalidasi, menyimpan ke database sebagai objek Product baru, dan mengembalikan response status (success/error). Setelah berhasil, user dinavigasi ke halaman utama dan ketika membuka halaman Product List (product_list.dart), fungsi fetchProduct() dipanggil yang melakukan request.get untuk mengambil semua data produk dalam format JSON dari Django serializer. 
+
+Response JSON kemudian di-parse menjadi List<ProductEntry> menggunakan ProductEntry.fromJson() di dalam model product_entry.dart, dan FutureBuilder menunggu hasil fetch tersebut untuk menampilkan data melalui widget ProductEntryCard yang menampilkan thumbnail, nama, harga, kategori, dan deskripsi produk. 
+
+Jika terjadi error, FutureBuilder menampilkan pesan error. Jika data kosong, ditampilkan pesan There are no products in Garuda Gear.
+
+6. Jelaskan mekanisme autentikasi dari login, register, hingga logout. Mulai dari input data akun pada Flutter ke Django hingga selesainya proses autentikasi oleh Django dan tampilnya menu pada Flutter.
+
+= Mekanisme autentikasi pada Garuda Gear dimulai dari register: user mengisi form di register.dart (username, password, confirm password) lalu menekan tombol Register yang memanggil request.postJson untuk mengirim data ke Django; Django memvalidasi data, membuat user baru di database, dan mengembalikan response status success atau error, kemudian jika berhasil user dinavigasi ke LoginPage. Untuk login: user memasukkan username dan password di login.dart, lalu request.login dipanggil; CookieRequest.login() mengirim kredensial ke Django yang memverifikasi melalui authenticate(), jika valid Django membuat session dan mengirim cookie sessionid kembali ke Flutter, CookieRequest menyimpan cookie tersebut dan mengubah state request.loggedIn menjadi true, kemudian app menavigasi user ke MyHomePage() dengan pesan Welcome, [username]. Untuk logout: ketika user menekan tombol Logout (di product_card atau drawer), dipanggil request.logout yang memberitahu Django untuk menghapus session di server, lalu CookieRequest menghapus cookie lokal dan mengubah request.loggedIn menjadi false, kemudian user dinavigasi kembali ke LoginPage. Semua request berikutnya (seperti fetch produk atau create produk) menggunakan instance CookieRequest yang sama dari Provider sehingga cookie session otomatis disertakan di setiap request, menjaga state autentikasi konsisten di seluruh aplikasi.
+
+7. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step! (bukan hanya sekadar mengikuti tutorial).
+
+= Implementasi checklist dilakukan dengan langkah-langkah berikut:
+
+1) Setup Backend Django: Membuat endpoints /auth/login/, /auth/register/, /auth/logout/, /json/ (untuk list produk), dan /create-flutter/ (untuk create produk) dengan konfigurasi CORS (django-cors-headers dengan CORS_ALLOW_CREDENTIALS=True dan CORS_ALLOWED_ORIGINS), menambahkan 10.0.2.2 dan localhost ke ALLOWED_HOSTS, serta mengatur cookie settings (SESSION_COOKIE_SAMESITE=None dan CSRF_COOKIE_SAMESITE=None).
+
+2) Setup Flutter Dependencies dan Provider: Menambahkan dependencies pbp_django_auth, provider, dan google_fonts ke pubspec.yaml, lalu membuat instance CookieRequest global menggunakan Provider di main.dart agar semua komponen dapat mengakses session yang sama.
+
+3) Membuat Model dan Screens: Membuat model ProductEntry di lib/models/product_entry.dart dengan method fromJson/toJson untuk mapping data JSON dari Django ke objek Dart dengan field name, price, description, category, thumbnail, dan isFeatured. Kemudian implementasi screens: login.dart menggunakan request.login() dan navigasi ke menu jika berhasil; register.dart menggunakan request.postJson() untuk registrasi; productlist_form.dart dengan form validation dan request.postJson() untuk mengirim data produk baru; product_list.dart dengan FutureBuilder yang memanggil fetchProduct() (menggunakan request.get()) dan menampilkan list produk menggunakan ProductEntryCard; product_detail.dart untuk menampilkan detail lengkap produk.
+
+4) Konfigurasi Final dan Testing: Menambahkan <uses-permission android:name="android.permission.INTERNET" /> di AndroidManifest.xml, styling dengan Google Fonts Poppins di main.dart, dan menambahkan AppBar dengan warna dan font konsisten di semua screens. Untuk testing, menjalankan Django server, mengubah base URL di Flutter dari localhost:8000 menjadi 10.0.2.2:8000 untuk emulator Android, lalu menjalankan flutter clean dan flutter run untuk memastikan semua perubahan (terutama yang terkait font dan network) diterapkan dengan full restart, bukan hot reload.

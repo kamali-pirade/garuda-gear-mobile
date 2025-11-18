@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:garuda_gear/screens/menu.dart';
 import 'package:garuda_gear/screens/productlist_form.dart';
+import 'package:garuda_gear/screens/product_list.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -11,7 +12,7 @@ class LeftDrawer extends StatelessWidget {
       child: ListView(
         children: [
           const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue),
+            decoration: BoxDecoration(color: Colors.deepPurple),
             child: Column(
               children: [
                 Text(
@@ -59,6 +60,19 @@ class LeftDrawer extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const ProductFormPage(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.list),
+            title: const Text('Product List'),
+            // Bagian redirection ke ProductListPage
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProductListPage(),
                 ),
               );
             },

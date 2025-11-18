@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:garuda_gear/widgets/left_drawer.dart';
+import 'package:garuda_gear/screens/menu.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 class ProductFormPage extends StatefulWidget {
   const ProductFormPage({super.key});
@@ -28,13 +32,14 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text('Form Add Product')),
-        backgroundColor: Colors.indigo,
+        backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
-      // tambahin drawer
       drawer: const LeftDrawer(),
       body: Form(
         key: _formKey,
@@ -70,7 +75,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
-                  keyboardType: TextInputType.number, // keyboard numerik
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     hintText: "Price",
                     labelText: "Price",
@@ -164,7 +169,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
                   decoration: InputDecoration(
-                    hintText: "URL Thumbnail (opsional)",
+                    hintText: "URL Thumbnail (optional)",
                     labelText: "URL Thumbnail",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0),
@@ -175,25 +180,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
                       _thumbnail = value ?? '';
                     });
                   },
-                  validator: (String? value) {
-                    if (value != null && value.isNotEmpty) {
-                      bool isValidUrl =
-                          Uri.tryParse(value)?.hasAbsolutePath ?? false;
-                      if (!isValidUrl) {
-                        return "Please enter a valid URL";
-                      }
-                      if (!value.toLowerCase().startsWith('http')) {
-                        return "URL must start with http:// or https://";
-                      }
-                      if (!value.toLowerCase().endsWith('.jpg') &&
-                          !value.toLowerCase().endsWith('.jpeg') &&
-                          !value.toLowerCase().endsWith('.png') &&
-                          !value.toLowerCase().endsWith('.gif')) {
-                        return "URL must end with .jpg, .jpeg, .png, or .gif";
-                      }
-                    }
-                    return null;
-                  },
+                  // Validator dihapus atau dibuat optional
+                  validator: null, // Tidak ada validasi, thumbnail opsional
                 ),
               ),
 
@@ -216,41 +204,46 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.indigo),
+                    backgroundColor: MaterialStateProperty.all(
+                      Colors.deepPurple,
+                    ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Produk berhasil tersimpan'),
-                            content: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Name: $_name'),
-                                  Text('Description: $_description'),
-                                  Text('Category: $_category'),
-                                  Text('Thumbnail: $_thumbnail'),
-                                  Text(
-                                    'Featured: ${_isFeatured ? "Yes" : "No"}',
-                                  ),
-                                ],
+                      final response = await request.postJson(
+                        "http://localhost:8000/create-flutter/",
+                        jsonEncode({
+                          "name": _name,
+                          "price": _price.toString(),
+                          "description": _description,
+                          "category": _category,
+                          "thumbnail": _thumbnail,
+                          "is_featured": _isFeatured,
+                        }),
+                      );
+                      if (context.mounted) {
+                        if (response['status'] == 'success') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Product successfully saved!"),
+                            ),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MyHomePage(),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Something went wrong, please try again.",
                               ),
                             ),
-                            actions: [
-                              TextButton(
-                                child: const Text('OK'),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _formKey.currentState!.reset();
-                                },
-                              ),
-                            ],
                           );
-                        },
-                      );
+                        }
+                      }
                     }
                   },
                   child: const Text(

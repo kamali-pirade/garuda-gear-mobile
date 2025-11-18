@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:garuda_gear/widgets/left_drawer.dart';
 import 'package:garuda_gear/widgets/product_card.dart';
-import 'package:garuda_gear/screens/productlist_form.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
-  final String nama = "Lessyarta Kamali Sopamena Pirade"; // nama
+  final String nama = "Kamali Pirade"; // nama
   final String npm = "2406356643"; // npm
   final String kelas = "C"; // kelas
 
   final List<ItemHomepage> items = const [
-    // tiap item punya nama, icon, dan warna
-    ItemHomepage("All Products", Icons.sports_soccer, Colors.blue),
-    ItemHomepage("My Products", Icons.shopping_basket, Colors.green),
-    ItemHomepage("Add Product", Icons.add, Colors.red),
+    ItemHomepage(
+      "All Products",
+      Icons.shopping_bag,
+      Color.fromARGB(255, 34, 136, 161),
+    ),
+    ItemHomepage("Add Product", Icons.add, Color.fromARGB(255, 72, 119, 74)),
+    ItemHomepage("Logout", Icons.logout, Color.fromARGB(255, 134, 46, 40)),
   ];
 
   @override
   Widget build(BuildContext context) {
     // Scaffold menyediakan struktur dasar halaman dengan AppBar dan body.
     return Scaffold(
-      // AppBar adalah bagian atas halaman yang menampilkan judul.
       appBar: AppBar(
         // Judul aplikasi "Garuda Gear" dengan teks putih dan tebal.
         title: const Text(
@@ -31,7 +32,7 @@ class MyHomePage extends StatelessWidget {
         // Warna latar belakang AppBar diambil dari skema warna tema aplikasi.
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      drawer: LeftDrawer(),
+      drawer: const LeftDrawer(),
       // Body halaman dengan padding di sekelilingnya.
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -129,69 +130,7 @@ class InfoCard extends StatelessWidget {
 class ItemHomepage {
   final String name;
   final IconData icon;
-  final Color color; // warna
+  final Color color;
 
-  const ItemHomepage(
-    this.name,
-    this.icon,
-    this.color,
-  ); // argumen: nama, icon, warna
-}
-
-class ItemCard extends StatelessWidget {
-  // Menampilkan kartu dengan ikon dan nama.
-
-  final ItemHomepage item;
-
-  const ItemCard(this.item, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      // ambil warna dari item.color
-      color: item.color,
-      // Membuat sudut kartu melengkung.
-      borderRadius: BorderRadius.circular(12),
-
-      child: InkWell(
-        // Aksi ketika kartu ditekan.
-        onTap: () {
-          // Handle navigation based on which card was tapped
-          if (item.name == "Add Product") {
-            // Navigate to ProductFormPage when Create Product is tapped
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ProductFormPage()),
-            );
-          } else {
-            // Show SnackBar for other buttons
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(content: Text("You've pressed ${item.name}!")),
-              );
-          }
-        },
-        // Container untuk menyimpan Icon dan Text
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          child: Center(
-            child: Column(
-              // Menyusun ikon dan teks di tengah kartu.
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(item.icon, color: Colors.white, size: 30.0),
-                const Padding(padding: EdgeInsets.all(3)),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  const ItemHomepage(this.name, this.icon, this.color);
 }

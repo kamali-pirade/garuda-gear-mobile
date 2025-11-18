@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:garuda_gear/screens/productlist_form.dart';
 import 'package:garuda_gear/screens/menu.dart';
+import 'package:garuda_gear/screens/product_list.dart';
+import 'package:garuda_gear/screens/login.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 class ItemCard extends StatelessWidget {
   // Menampilkan kartu dengan ikon dan nama.
@@ -11,28 +15,56 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Material(
-      // Menentukan warna latar belakang dari tema aplikasi.
-      color: Theme.of(context).colorScheme.secondary,
+      // ambil warna dari item.color
+      color: item.color,
       // Membuat sudut kartu melengkung.
       borderRadius: BorderRadius.circular(12),
 
       child: InkWell(
         // Aksi ketika kartu ditekan.
-        onTap: () {
-          // Menampilkan pesan SnackBar saat kartu ditekan.
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(content: Text("You've pressed ${item.name}!")),
-            );
-
+        onTap: () async {
           // Navigate ke route yang sesuai (tergantung jenis tombol)
           if (item.name == "Add Product") {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const ProductFormPage()),
             );
+          } else if (item.name == "All Products") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProductListPage()),
+            );
+          } else if (item.name == "Logout") {
+            final response = await request.logout(
+              "http://localhost:8000/auth/logout/",
+            );
+            String message = response["message"];
+            if (context.mounted) {
+              if (response['status']) {
+                String uname = response["username"];
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("$message See you again, $uname.")),
+                );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              } else {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(message)));
+              }
+            }
+          } else {
+            // Menampilkan pesan SnackBar saat kartu ditekan.
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(content: Text("You've pressed ${item.name}!")),
+              );
           }
         },
         // Container untuk menyimpan Icon dan Text
