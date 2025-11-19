@@ -171,6 +171,31 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     child: const Text('Register'),
                   ),
+                  const SizedBox(height: 36.0),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'Already have an account? ',
+                        style: GoogleFonts.poppins(
+                          color: const Color.fromARGB(255, 75, 75, 75),
+                          fontSize: 16.0,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Login',
+                            style: GoogleFonts.poppins(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontSize: 16.0,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

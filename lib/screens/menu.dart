@@ -12,11 +12,16 @@ class MyHomePage extends StatelessWidget {
   final List<ItemHomepage> items = const [
     ItemHomepage(
       "All Products",
-      Icons.shopping_bag,
-      Color.fromARGB(255, 34, 136, 161),
+      Icons.shopping_cart,
+      Color.fromARGB(255, 50, 71, 121),
     ),
-    ItemHomepage("Add Product", Icons.add, Color.fromARGB(255, 72, 119, 74)),
-    ItemHomepage("Logout", Icons.logout, Color.fromARGB(255, 134, 46, 40)),
+    ItemHomepage(
+      "My Products",
+      Icons.shopping_bag,
+      Color.fromARGB(255, 148, 113, 122),
+    ),
+    ItemHomepage("Add Product", Icons.add, Color.fromARGB(255, 56, 88, 57)),
+    ItemHomepage("Logout", Icons.logout, Color.fromARGB(255, 99, 61, 59)),
   ];
 
   @override
@@ -31,6 +36,7 @@ class MyHomePage extends StatelessWidget {
         ),
         // Warna latar belakang AppBar diambil dari skema warna tema aplikasi.
         backgroundColor: Theme.of(context).colorScheme.primary,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       drawer: const LeftDrawer(),
       // Body halaman dengan padding di sekelilingnya.
@@ -70,13 +76,14 @@ class MyHomePage extends StatelessWidget {
                     ),
                   ),
 
-                  // Grid untuk menampilkan ItemCard dalam bentuk grid 3 kolom.
+                  // Grid untuk menampilkan ItemCard dalam bentuk grid 4 kolom.
                   GridView.count(
                     primary: true,
                     padding: const EdgeInsets.all(20),
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    crossAxisCount: 3,
+                    crossAxisCount: 4,
+                    childAspectRatio: 1.0,
                     // Agar grid menyesuaikan tinggi kontennya.
                     shrinkWrap: true,
 

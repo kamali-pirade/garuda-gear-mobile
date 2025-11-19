@@ -54,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -175,11 +176,23 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       );
                     },
-                    child: Text(
-                      'Don\'t have an account? Register',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 16.0,
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'Don\'t have an account? ',
+                        style: GoogleFonts.poppins(
+                          color: const Color.fromARGB(255, 75, 75, 75),
+                          fontSize: 16.0,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: 'Register',
+                            style: GoogleFonts.poppins(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontSize: 16.0,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
